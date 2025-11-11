@@ -8,11 +8,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +50,15 @@ class OpenMensaAPITests {
 	@Test
 	void testGetMeals() throws IOException {
 		// TODO prepare call
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+		String today = sdf.format(new Date());
+		Call<List<Meal>> call = openMensaAPI.getMeal(today);
+
+		Response<List<Meal>> resp = call.execute();
+
+		if (resp.isSuccessful()){
+			System.out.println(resp.body());
+		}
 
 		// TODO execute the call synchronously
 
