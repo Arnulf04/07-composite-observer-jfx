@@ -48,6 +48,25 @@ public class Meal {
 		this.notes = notes;
 	}
 
+	public boolean isVegetarian() {
+		if (category.toLowerCase().equals("vegetarisch")
+			|| category.toLowerCase().equals("vegan")) {
+			return true;
+		}
+
+		return false;
+
+		/* for other cafeterias than 269, it might be on the notes...
+		// make sure there's no meat in the notes
+		boolean containsMeat = false;
+		for(String s : notes){
+			containsMeat = containsMeat || s.contains("fleisch") || s.contains("geflügel");
+		}
+
+		return !containsMeat;
+		*/
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

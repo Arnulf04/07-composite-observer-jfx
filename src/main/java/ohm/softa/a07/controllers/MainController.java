@@ -1,5 +1,6 @@
 package ohm.softa.a07.controllers;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -26,11 +27,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class MainController implements Initializable {
 	// use for debugging
 	private static final Logger LOGGER = Logger.getLogger( MainController.class.getName() );
-	private OpenMensaAPI openMensaAPI;
+	private List<Meal> meals = CallMethod.getMeals();
 
 	// use annotation to tie to component in XML
 	@FXML
@@ -51,39 +53,15 @@ public class MainController implements Initializable {
 		btnRefresh.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-				String today = sdf.format(new Date());
-
-				HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-				loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-				OkHttpClient client = new OkHttpClient.Builder()
-					.addInterceptor(loggingInterceptor)
-					.build();
-
-				Retrofit retrofit = new Retrofit.Builder()
-					.addConverterFactory(GsonConverterFactory.create())
-					.baseUrl("https://openmensa.org/api/v2/")
-					.client(client)
-					.build();
-
-				openMensaAPI = retrofit.create(OpenMensaAPI.class);
-
-				Call<List<Meal>> call = openMensaAPI.getMeal(today);
-				Response<List<Meal>> resp = null;
-				try {
-					resp = call.execute();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-
-				if (resp.isSuccessful()){
-					System.out.println(resp.body());
-				}
+//				List<Meal> meals = CallMethod.getMeals();
 
 				// create a new (observable) list and tie it to the view
 				LOGGER.info("go in refresh");
-				ObservableList<String> list = FXCollections.observableArrayList(resp.body());
+				List<String> mealNames = meals.stream()
+					.map(Meal::getName) // Ruft getName() für jedes Meal auf
+					.collect(Collectors.toList());
+				ObservableList<String> list = FXCollections.observableArrayList(mealNames);
+				LOGGER.info(list.toString());
 				mealsList.setItems(list);
 			}
 		});
@@ -93,15 +71,25 @@ public class MainController implements Initializable {
 			@Override
 			public void handle(ActionEvent event) {
 				LOGGER.info("go in close");
-				ObservableList<String> list = FXCollections.observableArrayList("AHA", "Dampf");
-				mealsList.setItems(list);
+
+				// leave program
+				Platform.exit();
+				System.exit(0);
 			}
 		});
 		chkVegetarian.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				LOGGER.info("go in vegetarian");
-				ObservableList<String> list = FXCollections.observableArrayList("VEGGI", "Dampf");
+
+				// create a new (observable) list and tie it to the view
+				LOGGER.info("go in refresh");
+				List<String> mealNames = meals.stream()
+					.map(Meal::getName) // Ruft getName() für jedes Meal auf
+					.filter(meal -> meal.toLowerCase().equals("vegetarisch"))
+					.collect(Collectors.toList());
+				ObservableList<String> list = FXCollections.observableArrayList(mealNames);
+				LOGGER.info(list.toString());
 				mealsList.setItems(list);
 			}
 		});
